@@ -12,7 +12,8 @@ margin: 0 auto;
 .main-form {
   display: flex;
   gap: 8px;
-
+margin-left: auto;
+margin-right: auto;
   justify-content: center;
   margin-bottom: 32px;
   position: relative;
@@ -72,6 +73,7 @@ color: #808080;
     flex-wrap: wrap;
     row-gap: 24px;
     margin-top: 60px;
+    padding-bottom: 10px;
   
 }
 .photo-main-list {
@@ -163,3 +165,17 @@ color: #2e2f42;
     transform: rotate(-360deg);
   }
 } 
+.btn-add{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  background: #4e75ff;
+  border-radius: 8px;
+  padding: 8px 16px;
+  width: 150px;
+  border-color: transparent;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
