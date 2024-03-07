@@ -10,32 +10,36 @@ import getImages from "./js/pixabay-api";
 
 const list = document.querySelector('.todo-list');
 const searchInput = document.querySelector('.input-text');
+const loadMoreBtn = document.querySelector('[data-action="load-more"]');
 
 const form = document.querySelector('.main-form');
 
 const load = document.querySelector('.loader');
-
+const lightbox = new SimpleLightbox('.todo-list a.galery-link',{
+    captionsData: 'alt',
+    captionDelay: 500,
+});
 load.style.display = 'none';
+let current_page = 0;
 
 function handler(event){
     event.preventDefault();
     list.style.marginTop = '60px';
-
     load.style.display = 'inline-block';
-
+    const query = event.target.elements.query.value.trim();
+    if (!query){
+        return;
+      }
     getImages(searchInput.value)
     .then(data => {
-        const images = data.hits;
+        const images = data.hits.slice(current_page, current_page + 15);
         if(images.length === 0){
             list.innerHTML='';
             return handlerError();
         }else{
-            list.innerHTML = createMarkup(images);
-            const lightbox = new SimpleLightbox('.todo-list a.galery-link',{
-                captionsData: 'alt',
-                captionDelay: 500,
-            });
+            list.innerHTML += createMarkup(images);
             lightbox.refresh();
+            loadedImagesCount += 15;
         }
     })
     .catch(error => console.log(error))
@@ -59,3 +63,6 @@ function handlerError(){
         backgroundColor: '#ed6f7c',
     });
 }
+loadMoreBtn.addEventListener('click', event =>{
+handler(event);
+})
