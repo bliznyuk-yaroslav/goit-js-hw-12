@@ -119,12 +119,12 @@ color: #2e2f42;
     
 }
 .loader {
+  display: none;
   width: 48px;
   height: 48px;
   border: 3px dotted #FFF;
   border-style: solid solid dotted dotted;
   border-radius: 50%;
-  display: inline-block;
   position: relative;
   box-sizing: border-box;
   right: 50%;
@@ -132,7 +132,6 @@ color: #2e2f42;
   animation: rotation 2s linear infinite;
 }
 .loader::after {
-  display: none;
   content: '';  
   box-sizing: border-box;
   position: absolute;
