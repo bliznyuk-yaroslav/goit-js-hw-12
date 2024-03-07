@@ -1,5 +1,6 @@
+const list = document.querySelector('.todo-list');
 export default function createMarkup(images){
-    return images
+    const markup = images
     .map(
         ({
             webformatURL,
@@ -38,4 +39,6 @@ export default function createMarkup(images){
         }
     )
     .join('');
+
+    list.insertAdjacentHTML('beforeend', markup)
 }

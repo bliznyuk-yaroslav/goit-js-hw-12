@@ -6,7 +6,7 @@ import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
 import createMarkup from './js/render-functions';
-import getImages from "./js/pixabay-api";
+import getNewImages from "./js/pixabay-api";
 
 const list = document.querySelector('.todo-list');
 const searchInput = document.querySelector('.input-text');
@@ -15,41 +15,78 @@ const loadMoreBtn = document.querySelector('[data-action="load-more"]');
 const form = document.querySelector('.main-form');
 
 const load = document.querySelector('.loader');
+
 const lightbox = new SimpleLightbox('.todo-list a.galery-link',{
     captionsData: 'alt',
     captionDelay: 500,
 });
-load.style.display = 'none';
-let current_page = 0;
+let currentQuery;
+let currentPage = 1;
 
-function handler(event){
+async function handler(event){
     event.preventDefault();
-    list.style.marginTop = '60px';
-    load.style.display = 'inline-block';
-    const query = event.target.elements.query.value.trim();
-    if (!query){
-        return;
-      }
-    getImages(searchInput.value)
-    .then(data => {
-        const images = data.hits.slice(current_page, current_page + 15);
-        if(images.length === 0){
-            list.innerHTML='';
+    list.innerHTML = null;
+    const query = searchInput.value.trim();
+    try {
+        const data = await getNewImages( query, 15, 1);
+        if( data.hits.length === 0){
+            list.innerHTML = '';
+            load.style.display = 'none';
+            loadMoreBtn.classList.add('is-hidden');
             return handlerError();
-        }else{
-            list.innerHTML += createMarkup(images);
-            lightbox.refresh();
-            loadedImagesCount += 15;
         }
-    })
-    .catch(error => console.log(error))
-    .finally(() => {
-        load.style.display = 'none';
-        list.style.marginTop = '20px';
-    });
-    searchInput.value = '';
+        else{
+            createMarkup(data.hits);
+            lightbox.refresh();
+            currentQuery = query;
+            currentPage = 1
+            load.style.display = 'none';
+            if(data.hits.length < 15 ){
+                loadMoreBtn.style.display = 'none';
+                handlerErrorResult();
+            }
+            else{
+                loadMoreBtn.style.display = 'block';
+            }
+        }
+    }
+    catch(error){
+        console.error(error);
+    }
 }
-form.addEventListener('submit', handler);
+    form.addEventListener('submit', handler);
+
+    function loadImages(e) {
+        e.preventDefault();
+        let currentQuery = searchInput.value;
+      
+        list.insertAdjacentElement('afterend', load);
+        load.style.display = 'inline-block';
+        currentPage++;
+      
+        getNewImages(currentQuery, 15, currentPage).then(data => {
+          if (data.hits.length === 0) {
+            load.style.display = 'none';
+            loadMoreBtn.style.display = 'none';
+            return handlerErrorResult();
+          } else {
+            createMarkup(data.hits);
+            lightbox.refresh();
+            load.style.display = 'none';
+            const boxFotos = list;
+            const rect = boxFotos.getBoundingClientRect();
+            window.scrollBy(0, rect.height * 2);
+      
+            if (data.hits.length < 15) {
+              loadMoreBtn.style.display = 'none';
+              handlerErrorResult();
+            } else {
+              loadMoreBtn.style.display = 'block';
+            }
+          }
+        });
+      }
+      loadMoreBtn.addEventListener('click', loadImages);
 
 function handlerError(){
     iziToast.error({
@@ -63,6 +100,16 @@ function handlerError(){
         backgroundColor: '#ed6f7c',
     });
 }
-loadMoreBtn.addEventListener('click', event =>{
-handler(event);
-})
+
+function handlerErrorResult() {
+    iziToast.error({
+      maxWidth: '432px',
+      messageSize: '16px',
+      titleColor: ' #fafafb',
+      messageColor: '#fff',
+      message: "We're sorry, but you've reached the end of search results.",
+      closeOnEscape: true,
+      position: 'topRight',
+      backgroundColor: '#ed6f7c',
+    });
+  }
